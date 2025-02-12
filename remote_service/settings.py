@@ -91,6 +91,25 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    'update-exchange-rate-every-hour': {
+        'task': 'twelvedata.tasks.update_exchange_rate',
+        'schedule': 3600.0,
+    },
+}
+
+BASE_URL_TWELVE_DATA = env('BASE_URL_TWELVE_DATA')
+BASE_URL_SAT = env('BASE_URL_SAT')
+
+API_KEY_TWELVE_DATA = env('API_KEY_TWELVE_DATA')
+X_SRFTOKEN = env('X_SRFTOKEN')

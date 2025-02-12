@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework import mixins
-from .serializers import ExchangeRateSerializer
+from .serializers import ExchangeRateSerializer, ApplicationSerializer
 from .services import TwelveDataService
+from .tasks import create_application
 
 class ExchangeRateViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ExchangeRateSerializer
@@ -26,3 +27,15 @@ class ExchangeRateViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             )
 
         return Response(exchange_rate_response.data)
+
+
+class ApplicationViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    serializer_class = ApplicationSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        create_application.delay(serializer.validated_data)
+
+        return Response({"message": "Application is being processed"}, status=status.HTTP_202_ACCEPTED)
